@@ -69,7 +69,7 @@ async function askSetupQuestions({ rootDirectory }) {
       name: 'validate',
       type: 'confirm',
       default: false,
-      message: 'Do you want to run the build/tests/etc to verify things are setup properly?'
+      message: 'Do you want to run the validate/lint/typecheck to verify things are setup properly?'
     }
   ])
 
