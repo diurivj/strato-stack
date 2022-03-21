@@ -26,6 +26,7 @@ async function seed() {
     }
   })
 
+  console.log(`User created:`, { user })
   console.log(`Database has been seeded. 🌱`)
 }
 

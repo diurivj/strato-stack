@@ -1,11 +1,11 @@
 # Remix Indie Stack
 
-![The Remix Indie Stack](https://repository-images.githubusercontent.com/465928257/a241fa49-bd4d-485a-a2a5-5cb8e4ee0abf)
+![The Remix Indie Stack](https://www.thedigitaltransformationpeople.com/wp-content/uploads/2019/05/fender-2409274_1920-640x400-c-default.jpg)
 
 Learn more about [Remix Stacks](https://remix.run/stacks).
 
 ```
-npx create-remix --template remix-run/indie-stack
+npx create-remix --template diurivj/strato-stack
 ```
 
 ## What's in the stack
@@ -17,9 +17,6 @@ npx create-remix --template remix-run/indie-stack
 - Email/Password Authentication with [cookie-based sessions](https://remix.run/docs/en/v1/api/remix#createcookiesessionstorage)
 - Database ORM with [Prisma](https://prisma.io)
 - Styling with [Tailwind](https://tailwindcss.com/)
-- End-to-end testing with [Cypress](https://cypress.io)
-- Local third party request mocking with [MSW](https://mswjs.io)
-- Unit testing with [Vitest](https://vitest.dev) and [Testing Library](https://testing-library.com)
 - Code formatting with [Prettier](https://prettier.io)
 - Linting with [ESLint](https://eslint.org)
 - Static Types with [TypeScript](https://typescriptlang.org)
@@ -50,8 +47,8 @@ This starts your app in development mode, rebuilding assets on file changes.
 
 The database seed script creates a new user with some data you can use to get started:
 
-- Email: `rachel@remix.run`
-- Password: `rachelrox`
+- Email: `diego@diego.com`
+- Password: `diego`
 
 ### Relevant code:
 
@@ -59,7 +56,6 @@ This is a pretty simple note-taking app, but it's a good example of how you can 
 
 - creating users, and logging in and out [./app/models/user.server.ts](./app/models/user.server.ts)
 - user sessions, and verifying them [./app/session.server.ts](./app/session.server.ts)
-- creating, and deleting notes [./app/models/note.server.ts](./app/models/note.server.ts)
 
 ## Deployment
 
@@ -78,8 +74,8 @@ Prior to your first deployment, you'll need to do a few things:
 - Create two apps on Fly, one for staging and one for production:
 
   ```sh
-  fly create indie-stack-template
-  fly create indie-stack-template-staging
+  fly create strato-stack-template
+  fly create strato-stack-template-staging
   ```
 
 - Create a new [GitHub Repository](https://repo.new)
@@ -89,8 +85,8 @@ Prior to your first deployment, you'll need to do a few things:
 - Add a `SESSION_SECRET` to your fly app secrets, to do this you can run the following commands:
 
   ```sh
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app indie-stack-template
-  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app indie-stack-template-staging
+  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app strato-stack-template
+  fly secrets set SESSION_SECRET=$(openssl rand -hex 32) --app strato-stack-template-staging
   ```
 
   If you don't have openssl installed, you can also use [1password](https://1password.com/generate-password) to generate a random secret, just replace `$(openssl rand -hex 32)` with the generated secret.
@@ -98,8 +94,8 @@ Prior to your first deployment, you'll need to do a few things:
 - Create a persistent volume for the sqlite database for both your staging and production environments. Run the following:
 
   ```sh
-  fly volumes create data --size 1 --app indie-stack-template
-  fly volumes create data --size 1 --app indie-stack-template-staging
+  fly volumes create data --size 1 --app strato-stack-template
+  fly volumes create data --size 1 --app strato-stack-template-staging
   ```
 
 Now that every is set up you can commit and push your changes to your repo. Every commit to your `main` branch will trigger a deployment to your production environment, and every commit to your `dev` branch will trigger a deployment to your staging environment.
@@ -110,34 +106,7 @@ We use GitHub Actions for continuous integration and deployment. Anything that g
 
 ## Testing
 
-### Cypress
-
-We use Cypress for our End-to-End tests in this project. You'll find those in the `cypress` directory. As you make changes, add to an existing file or create a new file in the `cypress/e2e` directory to test your changes.
-
-We use [`@testing-library/cypress`](https://testing-library.com/cypress) for selecting elements on the page semantically.
-
-To run these tests in development, run `npm run test:e2e:dev` which will start the dev server for the app as well as the Cypress client. Make sure the database is running in docker as described above.
-
-We have a utility for testing authenticated features without having to go through the login flow:
-
-```ts
-cy.login();
-// you are now logged in as a new user
-```
-
-We also have a utility to auto-delete the user at the end of your test. Just make sure to add this in each test file:
-
-```ts
-afterEach(() => {
-  cy.cleanupUser();
-});
-```
-
-That way, we can keep your local db clean and keep your tests isolated from one another.
-
-### Vitest
-
-For lower level tests of utilities and individual components, we use `vitest`. We have DOM-specific assertion helpers via [`@testing-library/jest-dom`](https://testing-library.com/jest-dom).
+Doesn't exist :)
 
 ### Type Checking
 
@@ -145,7 +114,7 @@ This project uses TypeScript. It's recommended to get TypeScript set up for your
 
 ### Linting
 
-This project uses ESLint for linting. That is configured in `.eslintrc.js`.
+This project uses ESLint for linting. That is configured in `.eslintrc.json`.
 
 ### Formatting
 
