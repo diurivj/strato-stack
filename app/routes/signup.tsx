@@ -1,9 +1,10 @@
 import * as React from 'react'
 import type { ActionFunction, LoaderFunction, MetaFunction } from 'remix'
-import { Form, json, Link, useActionData, redirect, useSearchParams } from 'remix'
+import { Form, Link, redirect, useSearchParams, json, useActionData } from 'remix'
 
-import { createUserSession, getUserId } from '~/session.server'
-import { verifyLogin } from '~/models/user.server'
+import { getUserId, createUserSession } from '~/session.server'
+
+import { createUser, getUserByEmail } from '~/models/user.server'
 import { validateEmail } from '~/utils'
 
 export const loader: LoaderFunction = async ({ request }) => {
@@ -13,8 +14,9 @@ export const loader: LoaderFunction = async ({ request }) => {
 }
 
 interface ActionData {
-  errors?: {
+  errors: {
     email?: string
+    name?: string
     password?: string
   }
 }
@@ -22,12 +24,16 @@ interface ActionData {
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData()
   const email = formData.get('email')
+  const name = formData.get('name')
   const password = formData.get('password')
   const redirectTo = formData.get('redirectTo')
-  const remember = formData.get('remember')
 
   if (!validateEmail(email)) {
     return json<ActionData>({ errors: { email: 'Email is invalid' } }, { status: 400 })
+  }
+
+  if (typeof name !== 'string') {
+    return json<ActionData>({ errors: { name: 'Name is required' } }, { status: 400 })
   }
 
   if (typeof password !== 'string') {
@@ -38,36 +44,40 @@ export const action: ActionFunction = async ({ request }) => {
     return json<ActionData>({ errors: { password: 'Password is too short' } }, { status: 400 })
   }
 
-  const user = await verifyLogin(email, password)
-
-  if (!user) {
-    return json<ActionData>({ errors: { email: 'Invalid email or password' } }, { status: 400 })
+  const existingUser = await getUserByEmail(email)
+  if (existingUser) {
+    return json<ActionData>({ errors: { email: 'A user already exists with this email' } }, { status: 400 })
   }
+
+  const user = await createUser(email, name, password)
 
   return createUserSession({
     request,
     userId: user.id,
-    remember: remember === 'on' ? true : false,
-    redirectTo: typeof redirectTo === 'string' ? redirectTo : '/notes'
+    remember: false,
+    redirectTo: typeof redirectTo === 'string' ? redirectTo : '/'
   })
 }
 
 export const meta: MetaFunction = () => {
   return {
-    title: 'Login'
+    title: 'Sign Up'
   }
 }
 
-export default function LoginPage() {
+export default function Join() {
   const [searchParams] = useSearchParams()
-  const redirectTo = searchParams.get('redirectTo') || '/notes'
+  const redirectTo = searchParams.get('redirectTo') ?? undefined
   const actionData = useActionData() as ActionData
   const emailRef = React.useRef<HTMLInputElement>(null)
+  const nameRef = React.useRef<HTMLInputElement>(null)
   const passwordRef = React.useRef<HTMLInputElement>(null)
 
   React.useEffect(() => {
     if (actionData?.errors?.email) {
       emailRef.current?.focus()
+    } else if (actionData?.errors?.name) {
+      nameRef.current?.focus()
     } else if (actionData?.errors?.password) {
       passwordRef.current?.focus()
     }
@@ -103,6 +113,31 @@ export default function LoginPage() {
           </div>
 
           <div>
+            <label htmlFor="user-name" className="block text-sm font-medium text-gray-700">
+              Name
+            </label>
+            <div className="mt-1">
+              <input
+                ref={nameRef}
+                id="user-name"
+                required
+                autoFocus={true}
+                name="name"
+                type="string"
+                autoComplete="name"
+                aria-invalid={actionData?.errors?.name ? true : undefined}
+                aria-describedby="name-error"
+                className="w-full rounded border border-gray-500 px-2 py-1 text-lg"
+              />
+              {actionData?.errors?.name && (
+                <div className="pt-1 text-red-700" id="email-error">
+                  {actionData.errors.name}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700">
               Password
             </label>
@@ -130,30 +165,19 @@ export default function LoginPage() {
             type="submit"
             className="w-full rounded bg-blue-500  py-2 px-4 text-white hover:bg-blue-600 focus:bg-blue-400"
           >
-            Log in
+            Create Account
           </button>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <input
-                id="remember"
-                name="remember"
-                type="checkbox"
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <label htmlFor="remember" className="ml-2 block text-sm text-gray-900">
-                Remember me
-              </label>
-            </div>
+          <div className="flex items-center justify-center">
             <div className="text-center text-sm text-gray-500">
-              Don't have an account?{' '}
+              Already have an account?{' '}
               <Link
                 className="text-blue-500 underline"
                 to={{
-                  pathname: '/signup',
+                  pathname: '/login',
                   search: searchParams.toString()
                 }}
               >
-                Sign up
+                Log in
               </Link>
             </div>
           </div>
